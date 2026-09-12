@@ -1,5 +1,163 @@
 # Blink to Scroll (Inverted)
 
+Close both eyes to scroll down. Open either eye to stop, show a disappointed
+This repository builds a Chrome/Chromium Manifest V3 extension. It is not a
+a published store package: you build it locally and load the generated `dist`
+folder as an unpacked extension.
+
+## Requirements
+
+- Google Chrome or another Chromium browser with Manifest V3 support
+- Node.js 18 or newer (Node.js 20 LTS is recommended)
+- npm 9 or newer, included with Node.js
+- A webcam and permission to use it
+
+The extension uses Chrome-specific APIs such as `chrome.offscreen`, so Firefox
+and Safari are not supported by this project as currently written.
+
+## Install and build
+
+Run these steps from the repository folder, the folder containing
+`package.json`.
+
+### macOS, Linux, Git Bash, or WSL
+
+```bash
+npm install
+mkdir -p public/models
+curl -L --fail -o public/models/face_landmarker.task \
+  https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+curl -L --fail -o public/models/gesture_recognizer.task \
+  https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task
+npm run build
+```
+
+### Windows PowerShell 7 or Windows PowerShell 5.1
+
+Use `New-Item` and `Invoke-WebRequest` instead of `mkdir -p` and `curl`.
+These commands work in both commonly installed PowerShell versions:
+
+```powershell
+npm install
+New-Item -ItemType Directory -Force -Path public\models | Out-Null
+Invoke-WebRequest -Uri "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task" -OutFile "public\models\face_landmarker.task"
+Invoke-WebRequest -Uri "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task" -OutFile "public\models\gesture_recognizer.task"
+npm run build
+```
+
+### Windows Command Prompt (`cmd.exe`)
+
+```bat
+npm install
+if not exist public\models mkdir public\models
+curl.exe -L --fail -o public\models\face_landmarker.task https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+curl.exe -L --fail -o public\models\gesture_recognizer.task https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task
+npm run build
+```
+
+The model downloads are required once after cloning. They are copied from
+`public/models/` into `dist/models/` during the build. Confirm that both files
+exist before loading the extension.
+
+## Older Node.js or npm versions
+
+The current Vite dependency requires a modern Node.js runtime. Check your
+versions first:
+
+```text
+node --version
+npm --version
+```
+
+If Node.js is older than 18, install a current LTS release from
+<https://nodejs.org/> or use a version manager such as `nvm-windows` on
+Windows or `nvm` on macOS/Linux. Then open a new terminal and run the build
+steps again.
+
+If npm is older but Node.js is already 18 or newer, `npm install` is usually
+enough. `npm ci` is also available when you want the exact dependency versions
+recorded in `package-lock.json`:
+
+```bash
+npm ci
+npm run build
+```
+
+If your older shell does not provide `curl`, download the two `.task` files in
+a browser and place them manually in `public/models/` with the exact filenames
+`face_landmarker.task` and `gesture_recognizer.task`.
+
+## Load the extension
+
+1. Open `chrome://extensions` in Chrome or the equivalent extensions page in
+  your Chromium browser.
+2. Turn on **Developer mode**.
+3. Click **Load unpacked**.
+4. Select the repository's `dist` folder, not the repository root.
+5. Pin the extension if desired, open a normal `http` or `https` website, and
+  click the extension icon to arm it.
+6. Allow camera access when prompted. Close both eyes to scroll.
+
+The build output is self-contained: it includes the manifest, extension
+scripts, icons, MediaPipe WebAssembly runtime, and the two model files.
+
+## Rebuild after changes
+
+There is no watch script. After changing a source file, run:
+
+```bash
+npm run build
+```
+
+Then return to `chrome://extensions` and click the extension's **Reload**
+button. Reload the page being tested too. If the extension was already using
+the camera, clicking its icon again may be necessary to arm the current tab.
+
+## Troubleshooting
+
+- **The extension does not load:** select `dist`, and make sure `dist/manifest.json`
+  exists after the build.
+- **The model fails to load:** check that both `.task` files are in
+  `public/models/` before running `npm run build`, then verify they are also in
+  `dist/models/`.
+- **The camera does not start:** allow camera access for the browser, use a
+  normal website rather than a browser-internal page, and try reloading the
+  extension.
+- **`npm run build` reports a missing WASM runtime:** remove `node_modules` and
+  `package-lock.json`, run `npm install`, and build again. Do this only if the
+  normal install did not complete successfully.
+
+## Project layout
+
+```text
+blink-to-scroll/
+├── package.json
+├── vite.config.js
+├── scripts/copy-static.js
+├── public/
+│   ├── manifest.json
+│   ├── icons/
+│   └── models/                 # downloaded .task files
+├── src/
+│   ├── background.js           # service worker and message router
+│   ├── offscreen.html          # webcam/MediaPipe document shell
+│   ├── offscreen.js            # webcam and face/gesture detection
+│   ├── content.js              # page behavior
+│   └── content.css             # page overlay and animation
+└── dist/                       # generated folder loaded by Chrome
+```
+
+## Tuning
+
+- `EAR_CLOSED_THRESHOLD` in `src/offscreen.js` controls how closed an eye
+  must be before it counts as closed. Lower it for fewer false triggers; raise
+  it if closed eyes are not detected reliably.
+- `CONSECUTIVE_FRAMES_TO_CONFIRM` reduces flicker by requiring several
+  matching frames before changing state.
+- The offscreen document is reused while the extension is running, so the
+  camera stream normally does not restart for every tab.
+# Blink to Scroll (Inverted)
+
 Close both eyes → the page scrolls down. Open even one eye → everything
 stops, a disappointed emoji shakes its head at you for two seconds, then
 you get teleported straight back to the top.
