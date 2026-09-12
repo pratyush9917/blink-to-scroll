@@ -111,33 +111,47 @@ For Software:
 - [Generated extension](dist/)
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name) *Add caption explaining what this shows*
+![Camera permission request](image.png)
+The extension requests permission to access the webcam.
 
-![Screenshot2](Add screenshot 2 here with proper name) *Add caption explaining what this shows*
+![Eyes-open response](image-1.png)
+The extension responds when the user opens their eyes while scrolling.
 
-![Screenshot3](Add screenshot 3 here with proper name) *Add caption explaining what this shows*
+![Raised-hand response](image-2.png)
+The extension detects a raised hand and stops scrolling while the user's eyes are closed.
 
 # Diagrams
-![alt text](<Content Service Worker Flow-2026-09-12-112532.png>)
+![Content and service worker flow](<Content Service Worker Flow-2026-09-12-112532.png>)
+The webcam continuously sends video frames to the hidden `offscreen.html` document,
+which uses MediaPipe to determine whether the user's eyes are open or closed.
+When both eyes are closed, the extension scrolls the webpage. When the eyes open,
+scrolling stops, an animation plays, and the page scrolls back to the top.
 
 
 # Build Photos
-![Components](Add photo of your components here) *List out all components shown*
 
-![Build](Add photos of build process here) *Explain the build steps*
+![Build process](image-3.png)
+The project is built with npm into a format that can be loaded by the browser.
 
-![Final](Add photo of final product here) *Explain the final build*
+![Extension loaded in Chrome](image-5.png)
+The built extension is loaded into Chrome for testing.
+
+![Final product](image-4.png)
+The completed extension controls webpage scrolling using eye and hand gestures.
 
 ### Project Demo
 
 # Video
-[Add your demo video link here] *Explain what the video demonstrates*
+<video controls src="20260912-1147-23.8316722.mp4" title="Blink to Scroll demonstration"></video>
+This video demonstrates the extension in operation. The first two cases show
+the user's eyes opening and closing. The third case shows a hand being raised
+before the eyes are closed, which does not trigger scrolling. The final case
+shows a hand being raised while the eyes are closed.
 
-# Additional Demos
-[Add any extra demo materials/links]
+<video controls src="20260912-1150-11.6188516.mp4" title="Demo with console output"></video>
+This video repeats the same demonstrations with the browser console output visible.
 
 ## Team Contributions
 
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- Pratyush: MAde the basic program and proofread the README.md
+- Rishik Kumar: Debugging and idea brainstorming
