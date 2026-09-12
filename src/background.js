@@ -9,6 +9,8 @@
 //      to the tab that's currently armed.
 
 const OFFSCREEN_DOCUMENT_PATH = "offscreen.html";
+const INACTIVITY_TIMEOUT_MINUTES = 1;
+const INACTIVITY_ALARM_PREFIX = "blink-to-scroll-inactivity-";
 
 // Track which tab is currently "armed" (has the content script + is
 // listening for blink events). Only one tab is active at a time in this
@@ -21,6 +23,22 @@ chrome.runtime.onInstalled.addListener(async () => {
   const state = await chrome.storage.session.get(["armedTabId", "pausedTabId"]);
   armedTabId = state.armedTabId ?? null;
   pausedTabId = state.pausedTabId ?? null;
+});
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (!alarm.name.startsWith(INACTIVITY_ALARM_PREFIX)) return;
+
+  const tabId = Number(alarm.name.slice(INACTIVITY_ALARM_PREFIX.length));
+  const state = await chrome.storage.session.get("armedTabId");
+  const currentArmedTabId = armedTabId ?? state.armedTabId ?? null;
+  if (!Number.isInteger(tabId) || tabId !== currentArmedTabId) return;
+
+  armedTabId = null;
+  activeTabId = null;
+  pausedTabId = null;
+  await chrome.storage.session.remove(["armedTabId", "pausedTabId"]);
+  sendTabState(tabId, false);
+  console.log(`[Blink to Scroll] Disarmed tab ${tabId} after inactivity`);
 });
 
 chrome.runtime.onMessage.addListener(async (message, sender) => {
@@ -51,6 +69,12 @@ chrome.runtime.onMessage.addListener(async (message, sender) => {
     }
 
     if (armedTabId !== null) {
+      resetInactivityAlarm(armedTabId);
+      if (!enabled) {
+        chrome.tabs
+          .sendMessage(armedTabId, { type: "HAND_RAISED" })
+          .catch(() => {});
+      }
       sendTabState(armedTabId, enabled);
     }
     return;
@@ -82,6 +106,7 @@ async function armTab(tabId, url) {
     await injectContentScript(tabId);
     armedTabId = tabId;
     activeTabId = tabId;
+    await resetInactivityAlarm(tabId);
     const state = await chrome.storage.session.get("pausedTabId");
     pausedTabId = state.pausedTabId ?? null;
     await chrome.storage.session.set({ armedTabId });
@@ -99,6 +124,8 @@ function isSupportedPage(url) {
 
 // If the armed tab is closed, forget it so we stop trying to message it.
 chrome.tabs.onRemoved.addListener((tabId) => {
+  chrome.alarms.clear(getInactivityAlarmName(tabId));
+
   if (tabId === armedTabId) {
     armedTabId = null;
     chrome.storage.session.remove("armedTabId");
@@ -123,6 +150,19 @@ function sendTabState(tabId, enabled) {
       // The tab may not have a content script yet or may be protected.
     });
 }
+
+function getInactivityAlarmName(tabId) {
+  return `${INACTIVITY_ALARM_PREFIX}${tabId}`;
+}
+
+async function resetInactivityAlarm(tabId) {
+  const alarmName = getInactivityAlarmName(tabId);
+  await chrome.alarms.clear(alarmName);
+  await chrome.alarms.create(alarmName, {
+    delayInMinutes: INACTIVITY_TIMEOUT_MINUTES,
+  });
+}
+
 
 async function ensureOffscreenDocument() {
   const existingContexts = await chrome.runtime.getContexts({
@@ -162,12 +202,21 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   // 1. Log every message the background script receives
   console.log("Background received:", message.type);
 
-  if (message.type === "EYES_CLOSED" || message.type === "EYES_OPENED") {
+  if (
+    message.type === "EYES_CLOSED" ||
+    message.type === "EYES_OPENED" ||
+    message.type === "EYES_NOT_DETECTED"
+  ) {
     const storedState = await chrome.storage.session.get("armedTabId");
     const targetTabId = armedTabId ?? storedState.armedTabId ?? null;
     armedTabId = targetTabId;
 
     if (targetTabId !== null && targetTabId === activeTabId) {
+      if (message.type === "EYES_CLOSED") {
+        chrome.alarms.clear(getInactivityAlarmName(targetTabId));
+      } else {
+        resetInactivityAlarm(targetTabId);
+      }
       
       // 2. Log that we are attempting to forward it
       console.log("Forwarding to tab ID:", targetTabId);

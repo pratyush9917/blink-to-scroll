@@ -23,6 +23,8 @@
   let progressFillEl = null;
   let progressPointerEl = null;
   let handEl = null;
+  let handTargetX = 0;
+  let handTargetY = 0;
   let teleportTimeoutId = null;
   let resetTimeoutId = null;
   let extensionEnabled = true;
@@ -38,6 +40,10 @@
       handleEyesClosed();
     } else if (message.type === "EYES_OPENED") {
       handleEyesOpened();
+    } else if (message.type === "EYES_NOT_DETECTED") {
+      handleEyesNotDetected();
+    } else if (message.type === "HAND_RAISED") {
+      handleHandRaised();
     } else if (message.type === "TAB_STATE") {
       setExtensionEnabled(message.enabled);
     }
@@ -45,21 +51,24 @@
 
   function setExtensionEnabled(enabled) {
     extensionEnabled = enabled;
-    progressEl.classList.toggle("blink-to-scroll-disabled", !enabled);
+    hideProgressBar();
 
-    if (!enabled) {
+    if (enabled) {
+      hideOverlay();
+    } else {
       stopScrolling();
     }
   }
 
   function handleEyesClosed() {
     if (!extensionEnabled) return;
+
+    if (teleportTimeoutId !== null || resetTimeoutId !== null) return;
+
     if (isScrolling) return; // already scrolling, nothing to do
 
-    // If a "shame" overlay/teleport sequence was mid-flight, cancel it —
-    // the user closed their eyes again before it finished.
-    cancelPendingTeleport();
     hideOverlay();
+    showProgressBar();
 
     isScrolling = true;
     scrollTimerId = window.setInterval(() => {
@@ -70,7 +79,13 @@
   }
 
   function handleEyesOpened() {
-    if (!extensionEnabled) return;
+    if (!extensionEnabled) {
+      hideProgressBar();
+      return;
+    }
+
+    captureHandTarget();
+    hideProgressBar();
     const wasScrolling = isScrolling;
 
     // Immediately stop scrolling regardless of prior state.
@@ -94,9 +109,34 @@
     }, TELEPORT_DELAY_MS);
   }
 
+  function handleEyesNotDetected() {
+    const wasScrolling = isScrolling;
+    hideProgressBar();
+    stopScrolling();
+
+    if (!wasScrolling) return;
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+    updateProgress();
+    hideOverlay();
+  }
+
+  function handleHandRaised() {
+    const wasScrolling = isScrolling;
+    stopScrolling();
+    hideProgressBar();
+
+    if (!wasScrolling) return;
+
+    window.scrollTo({ top: 0, behavior: "auto" });
+    updateProgress();
+    showAngryOverlay();
+  }
+
   function createProgressBar() {
     progressEl = document.createElement("div");
-    progressEl.className = "blink-to-scroll-progress";
+    progressEl.className =
+      "blink-to-scroll-progress blink-to-scroll-hidden";
 
     const track = document.createElement("div");
     track.className = "blink-to-scroll-progress-track";
@@ -122,6 +162,16 @@
     isScrolling = false;
   }
 
+  function showProgressBar() {
+    progressEl.style.display = "";
+    progressEl.classList.remove("blink-to-scroll-hidden");
+  }
+
+  function hideProgressBar() {
+    progressEl.style.display = "none";
+    progressEl.classList.add("blink-to-scroll-hidden");
+  }
+
   function updateProgress() {
     if (!progressEl) return;
 
@@ -131,6 +181,19 @@
 
     progressFillEl.style.width = `${percentage}%`;
     progressPointerEl.style.left = `${percentage}%`;
+  }
+
+  function captureHandTarget() {
+    updateProgress();
+
+    const barWidth = Math.min(280, Math.max(0, window.innerWidth - 32));
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+    const percentage = Math.max(0, Math.min(1, progress));
+    const barLeft = (window.innerWidth - barWidth) / 2;
+
+    handTargetX = barLeft + percentage * barWidth;
+    handTargetY = window.innerHeight - 48;
   }
 
   window.addEventListener("scroll", updateProgress, { passive: true });
@@ -143,12 +206,19 @@
   }
 
   function moveHandToPointer() {
-    const pointerRect = progressPointerEl.getBoundingClientRect();
-    handEl.style.setProperty("--hand-target-x", `${pointerRect.left + 9}px`);
-    handEl.style.setProperty("--hand-target-y", `${pointerRect.top + 6}px`);
+    handEl.style.setProperty("--hand-target-x", `${handTargetX}px`);
+    handEl.style.setProperty("--hand-target-y", `${handTargetY}px`);
   }
 
   function showDisappointedOverlay() {
+    showOverlay("😞", "I saw that.");
+  }
+
+  function showAngryOverlay() {
+    showOverlay("😡", "NO CHEATING");
+  }
+
+  function showOverlay(emojiText, captionText) {
     if (overlayEl) return; // already showing
 
     overlayEl = document.createElement("div");
@@ -156,11 +226,11 @@
 
     const emoji = document.createElement("div");
     emoji.className = "blink-to-scroll-emoji";
-    emoji.textContent = "😞";
+    emoji.textContent = emojiText;
 
     const caption = document.createElement("div");
     caption.className = "blink-to-scroll-caption";
-    caption.textContent = "I saw that.";
+    caption.textContent = captionText;
 
     overlayEl.appendChild(emoji);
     overlayEl.appendChild(caption);
@@ -176,14 +246,4 @@
     handEl = null;
   }
 
-  function cancelPendingTeleport() {
-    if (teleportTimeoutId !== null) {
-      clearTimeout(teleportTimeoutId);
-      teleportTimeoutId = null;
-    }
-    if (resetTimeoutId !== null) {
-      clearTimeout(resetTimeoutId);
-      resetTimeoutId = null;
-    }
-  }
 })();

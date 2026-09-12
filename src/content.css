@@ -28,8 +28,8 @@
   pointer-events: none;
 }
 
-.blink-to-scroll-progress.blink-to-scroll-disabled {
-  opacity: 0.45;
+.blink-to-scroll-progress.blink-to-scroll-hidden {
+  display: none !important;
 }
 
 .blink-to-scroll-toggle {

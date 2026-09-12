@@ -14,8 +14,8 @@ import {
 
 // --- Tunables -----------------------------------------------------------
 const EAR_CLOSED_THRESHOLD = 0.21; // below this, an eye counts as "closed"
-const CONSECUTIVE_FRAMES_TO_CONFIRM = 3; // debounce against single-frame noise
-const DETECTION_INTERVAL_MS = 66; // ~15 fps is plenty for blink detection
+const CONSECUTIVE_FRAMES_TO_CONFIRM = 2; // debounce while preserving fast blinks
+const DETECTION_INTERVAL_MS = 33; // ~30 fps catches brief eye closures
 
 // Classic 6-point EAR landmark sets from the MediaPipe 468-point face mesh.
 // Order per eye is [p1, p2, p3, p4, p5, p6] as used in the standard
@@ -35,6 +35,7 @@ let lastVideoTime = -1;
 let eyesCurrentlyClosed = false;
 let candidateState = null;
 let candidateStreak = 0;
+let faceCurrentlyDetected = true;
 
 async function init() {
   video = document.getElementById("webcam");
@@ -149,9 +150,15 @@ function processGestureResult(result) {
 
 function processResult(result) {
   if (!result.faceLandmarks || result.faceLandmarks.length === 0) {
-    // No face in frame — don't guess, just don't emit anything new.
+    if (faceCurrentlyDetected) {
+      faceCurrentlyDetected = false;
+      chrome.runtime.sendMessage({ type: "EYES_NOT_DETECTED" });
+    }
     return;
   }
+
+  const faceWasMissing = !faceCurrentlyDetected;
+  faceCurrentlyDetected = true;
 
   const landmarks = result.faceLandmarks[0];
   const leftEAR = calculateEAR(landmarks, LEFT_EYE_IDX);
@@ -160,6 +167,10 @@ function processResult(result) {
   // "Both eyes closed" per the spec — a single open eye must count as open.
   const bothClosedThisFrame =
     leftEAR < EAR_CLOSED_THRESHOLD && rightEAR < EAR_CLOSED_THRESHOLD;
+
+  if (faceWasMissing && bothClosedThisFrame && eyesCurrentlyClosed) {
+    chrome.runtime.sendMessage({ type: "EYES_CLOSED" });
+  }
 
   debounceAndEmit(bothClosedThisFrame);
 }

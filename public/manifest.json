@@ -3,7 +3,7 @@
   "name": "Blink to Scroll (Inverted)",
   "version": "1.0.0",
   "description": "Close both eyes to scroll down. Open even one eye and get judged by a disappointed emoji before being teleported back to the top.",
-  "permissions": ["activeTab", "scripting", "offscreen", "storage"],
+  "permissions": ["activeTab", "scripting", "offscreen", "storage", "alarms"],
   "background": {
     "service_worker": "background.js"
   },
