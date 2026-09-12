@@ -156,7 +156,7 @@ the user's eyes opening and closing. The third case shows a hand being raised
 before the eyes are closed, which does not trigger scrolling. The final case
 shows a hand being raised while the eyes are closed.
 
-[<video controls src="20260912-1150-11.6188516.mp4" title="Demo with console output"></video>](https://drive.google.com/file/d/1jzw9zoVMO5LbY5dQyUK1sA3Bb7x-rQMI/view?usp=drive_link)
+https://drive.google.com/file/d/1jzw9zoVMO5LbY5dQyUK1sA3Bb7x-rQMI/view?usp=drive_link
 
 This video repeats the same demonstrations with the browser console output visible.
 
