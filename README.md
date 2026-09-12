@@ -163,5 +163,5 @@ This video repeats the same demonstrations with the browser console output visib
 
 ## Team Contributions
 
-- Pratyush: MAde the basic program and proofread the README.md
+- Pratyush: Made the basic program and proofread the README.md
 - Rishik Kumar: Debugging and idea brainstorming
