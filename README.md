@@ -53,7 +53,6 @@ For Software:
 - `scripts/copy-static.js` assembles the generated `dist/` folder with the manifest, static files, models, and MediaPipe WebAssembly runtime.
 
 # Installation
-[]installation)
 Run these commands from the repository folder containing `package.json`.
 
 ### macOS, Linux, Git Bash, or WSL
@@ -110,7 +109,6 @@ For Software:
 - [Manifest](public/manifest.json)
 - [Build script](scripts/copy-static.js)
 - [Generated extension](dist/)
-- [Additional documentation or report link]
 
 # Screenshots (Add at least 3)
 ![Screenshot1](Add screenshot 1 here with proper name) *Add caption explaining what this shows*
@@ -120,7 +118,7 @@ For Software:
 ![Screenshot3](Add screenshot 3 here with proper name) *Add caption explaining what this shows*
 
 # Diagrams
-![Workflow](Add your workflow/architecture diagram here) *Add caption explaining your workflow*
+![alt text](<Content Service Worker Flow-2026-09-12-112532.png>)
 
 
 # Build Photos
