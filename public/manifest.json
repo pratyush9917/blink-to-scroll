@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Blink to Scroll (Inverted)",
+  "version": "1.0.0",
+  "description": "Close both eyes to scroll down. Open even one eye and get judged by a disappointed emoji before being teleported back to the top.",
+  "permissions": ["activeTab", "scripting", "offscreen", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Click to arm Blink to Scroll on this tab"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}

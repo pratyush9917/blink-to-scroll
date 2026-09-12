@@ -1,0 +1,180 @@
+/* content.css — injected alongside content.js */
+
+.blink-to-scroll-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483645; /* keep the progress bar visible during the reset */
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  animation: blink-to-scroll-fade-in 0.15s ease-out;
+  pointer-events: none; /* don't block the page once teleport happens */
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.blink-to-scroll-progress {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 2147483647;
+  height: 24px;
+  width: min(280px, calc(100vw - 32px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.blink-to-scroll-progress.blink-to-scroll-disabled {
+  opacity: 0.45;
+}
+
+.blink-to-scroll-toggle {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: -3px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid #5a351d;
+  border-radius: 3px;
+  background: #3d2416;
+  color: #d8b36a;
+  font: 700 12px/1 system-ui, sans-serif;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.blink-to-scroll-toggle:hover {
+  background: #664022;
+}
+
+.blink-to-scroll-progress-track {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  border: 3px solid #5a351d;
+  border-radius: 3px;
+  background: #3d2416;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.blink-to-scroll-progress-fill {
+  width: 0;
+  height: 100%;
+  background: #4f7f3a;
+  box-shadow: inset 0 2px 0 rgba(180, 210, 120, 0.25);
+  transition: width 80ms linear;
+}
+
+.blink-to-scroll-progress-pointer {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 12px solid #d8b36a;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.6));
+  transform: translateX(-9px);
+  transition: left 80ms linear;
+}
+
+.blink-to-scroll-emoji {
+  font-size: 140px;
+  line-height: 1;
+  animation: blink-to-scroll-shake 1s ease-in-out;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+.blink-to-scroll-caption {
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.blink-to-scroll-hand {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  z-index: 2147483647;
+  font-size: 72px;
+  opacity: 0;
+  transform: translate(-50%, 80px) rotate(-25deg);
+}
+
+.blink-to-scroll-hand-grab {
+  animation: blink-to-scroll-hand-grab 0.5s ease-in forwards;
+}
+
+@keyframes blink-to-scroll-hand-grab {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 80px) rotate(-25deg);
+  }
+  35% {
+    opacity: 1;
+    left: var(--hand-target-x);
+    top: var(--hand-target-y);
+    transform: translate(-50%, -50%) rotate(-8deg);
+  }
+  100% {
+    opacity: 1;
+    left: var(--hand-target-x);
+    top: var(--hand-target-y);
+    transform: translate(-50%, -50%) rotate(8deg) scale(0.8);
+  }
+}
+
+@keyframes blink-to-scroll-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Disappointed head-shake: rotate side to side, easing out toward the end
+   so it settles right around the 2s mark when the teleport fires. */
+@keyframes blink-to-scroll-shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(-18deg);
+  }
+  20% {
+    transform: rotate(16deg);
+  }
+  30% {
+    transform: rotate(-16deg);
+  }
+  40% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(-12deg);
+  }
+  60% {
+    transform: rotate(10deg);
+  }
+  70% {
+    transform: rotate(-8deg);
+  }
+  80% {
+    transform: rotate(6deg);
+  }
+  90% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "blink-to-scroll-inverted",
+  "version": "1.0.0",
+  "description": "Close both eyes to scroll. Open one and get shamed by an emoji.",
+  "type": "module",
+  "scripts": {
+    "build": "vite build && node scripts/copy-static.js"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.14"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

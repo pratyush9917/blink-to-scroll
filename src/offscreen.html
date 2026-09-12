@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Blink to Scroll — Offscreen</title>
+  </head>
+  <body>
+    <!-- Hidden video element that receives the webcam MediaStream.
+         Offscreen documents are never shown to the user, so styling
+         here doesn't matter, but we keep the video tiny just in case. -->
+    <video id="webcam" autoplay playsinline muted width="320" height="240"></video>
+    <canvas id="scratch" width="320" height="240" style="display:none"></canvas>
+
+    <!-- This is the BUNDLED output (see README) — do not point this at a
+         CDN URL. MV3's default CSP forbids remote script execution, so
+         @mediapipe/tasks-vision and its .wasm/.task assets must be bundled
+         locally by Vite/Webpack and copied into the extension folder. -->
+    <script src="offscreen.bundle.js"></script>
+  </body>
+</html>
