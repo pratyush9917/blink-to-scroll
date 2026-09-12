@@ -149,7 +149,8 @@ The completed extension controls webpage scrolling using eye and hand gestures.
 ### Project Demo
 
 # Video
-[<video controls src="20260912-1147-23.8316722.mp4" title="Blink to Scroll demonstration"></video>](https://drive.google.com/file/d/1KVp16zddrT71qVSppvnxfKViWkQZMq59/view?usp=drive_link)
+
+(https://drive.google.com/file/d/1KVp16zddrT71qVSppvnxfKViWkQZMq59/view?usp=drive_link)
 
 This video demonstrates the extension in operation. The first two cases show
 the user's eyes opening and closing. The third case shows a hand being raised
