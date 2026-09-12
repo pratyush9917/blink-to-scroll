@@ -149,14 +149,14 @@ The completed extension controls webpage scrolling using eye and hand gestures.
 ### Project Demo
 
 # Video
-<video controls src="20260912-1147-23.8316722.mp4" title="Blink to Scroll demonstration"></video>
+[<video controls src="20260912-1147-23.8316722.mp4" title="Blink to Scroll demonstration"></video>](https://drive.google.com/file/d/1KVp16zddrT71qVSppvnxfKViWkQZMq59/view?usp=drive_link)
 
 This video demonstrates the extension in operation. The first two cases show
 the user's eyes opening and closing. The third case shows a hand being raised
 before the eyes are closed, which does not trigger scrolling. The final case
 shows a hand being raised while the eyes are closed.
 
-<video controls src="20260912-1150-11.6188516.mp4" title="Demo with console output"></video>
+[<video controls src="20260912-1150-11.6188516.mp4" title="Demo with console output"></video>](https://drive.google.com/file/d/1jzw9zoVMO5LbY5dQyUK1sA3Bb7x-rQMI/view?usp=drive_link)
 
 This video repeats the same demonstrations with the browser console output visible.
 
